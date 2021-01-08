@@ -3,8 +3,6 @@
 [![NPM version](http://img.shields.io/npm/v/babel-plugin-transform-imports-api.svg)](https://www.npmjs.org/package/babel-plugin-transform-imports-api)
 [![Build Status](https://travis-ci.org/shinken008/babel-plugin-transform-imports-api.svg?branch=main)](https://travis-ci.org/shinken008/babel-plugin-transform-imports-api)
 [![Coverage Status](https://coveralls.io/repos/github/shinken008/babel-plugin-transform-imports-api/badge.svg?branch=main)](https://coveralls.io/github/shinken008/babel-plugin-transform-imports-api?branch=main)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://egghead.io/courses/how-to-contribute-to-an-open-source-project-on-github)
-[![Greenkeeper badge](https://badges.greenkeeper.io/shinken008/babel-plugin-transform-imports-api.svg)](https://greenkeeper.io/)
 
 Convert import default package API to modular reference to reduce package size and transforms member style imports. Inspired by [babel-plugin-transform-taroapi](https://www.npmjs.com/package/babel-plugin-transform-taroapi) and [babel-transform-imports](https://bitbucket.org/amctheatres/babel-transform-imports).
 
@@ -50,22 +48,25 @@ or
 npm install --save-dev babel-plugin-transform-imports-api
 ```
 ### Step 1: Configure .babelrc
+
+
 ```js
 {
   plugins: [
     [require(plugin), {
-    	packagesApis: new Map([
+      packagesApis: new Map([
         ['packageName1', new Set(['api'])],
-      	['packageName2', new Set(['api'])],
-    	]),
+        ['packageName2', new Set(['api'])],
+      ]),
       usePackgesImport: false, // Whether to use packagesImport
-    	packagesImport: {
-      	'packageName1': {
+      packagesImport: {
+        'packageName1': {
           transform: (importName, matches) => `packageName1/lib/${importName.toUpperCase()}`,
           preventFullImport: true,
         },
-    	}
- 	 }]
+      }
+    }]
   ]
 }
 ```
+
