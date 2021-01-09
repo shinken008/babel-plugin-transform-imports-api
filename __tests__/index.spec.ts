@@ -107,3 +107,13 @@ it('should not import taro duplicatly', function () {
   const result = babel.transform(code, { plugins: [pluginOptions] })
   expect(result?.code).toMatchSnapshot()
 })
+
+it('should not import default Taro', function () {
+  const code = `
+    import Taro from "@tarojs/taro-h5";
+    Taro.createAnimation()
+  `
+
+  const result = babel.transform(code, { plugins: [pluginOptions] })
+  expect(result?.code).toMatchSnapshot()
+})

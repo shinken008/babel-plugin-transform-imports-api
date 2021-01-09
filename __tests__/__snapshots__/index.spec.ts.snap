@@ -8,7 +8,7 @@ _tarojsTaroH.noop();"
 `;
 
 exports[`should not go wrong when using an api twice 1`] = `
-"import Taro, { createAnimation as _createAnimation } from '@tarojs/taro-h5';
+"import { createAnimation as _createAnimation } from '@tarojs/taro-h5';
 
 const animation = _createAnimation({
   duration: dura * 1000,
@@ -19,6 +19,12 @@ const resetAnimation = _createAnimation({
   duration: 0,
   timingFunction: 'linear'
 });"
+`;
+
+exports[`should not import default Taro 1`] = `
+"import { createAnimation as _createAnimation } from \\"@tarojs/taro-h5\\";
+
+_createAnimation();"
 `;
 
 exports[`should not import taro duplicatly 1`] = `

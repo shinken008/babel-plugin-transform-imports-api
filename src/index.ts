@@ -25,10 +25,12 @@ const plugin = function (babel: {
   const packageNeedDefault: Map<string, boolean> = new Map()
   // packageName 和 defaultName 的映射
   const packageNames: Map<string, string> = new Map()
+  // defaultName packageName 的映射
+  const packageDefaultNames: Map<string, string> = new Map()
   const packageIsApiImported: Map<string, boolean> = new Map()
 
   return {
-    name: 'babel-plugin-transform-taro-api',
+    name: 'babel-plugin-transform-imports-api',
     visitor: {
       ImportDeclaration (ast) {
         const packageName = ast.node.source.value
@@ -38,9 +40,8 @@ const plugin = function (babel: {
 
         ast.node.specifiers.forEach(node => {
           if (t.isImportDefaultSpecifier(node)) {
-            packageNeedDefault.set(packageName, true)
             packageNames.set(packageName, node.local.name)
-
+            packageDefaultNames.set(node.local.name, packageName)
           } else if (t.isImportSpecifier(node)) {
             // @ts-ignore
             const propertyName = node.imported.name
@@ -61,9 +62,24 @@ const plugin = function (babel: {
           }
         })
       },
+      Identifier(ast) {
+        const packageName = packageDefaultNames.get(ast.node.name)
+        if (!packageName) { return }
+        // import Taro from '@tarojs/taro'
+        if (t.isImportDefaultSpecifier(ast.parent)) { return }
+        // obj.Taro MemberExpression
+        if (t.isMemberExpression(ast.parent) || t.isJSXMemberExpression(ast.parent)) {
+           // @ts-ignore
+          if (ast.parent.object.name !== ast.node.name) {
+            return
+          }
+        }
+        // 如果 import default 变量边引用，则记录需要引入默认
+        packageNeedDefault.set(packageName, true)
+      },
       MemberExpression (ast) {
-        const [packageName] = Array.from(packageNames.entries())// @ts-ignore
-                                    .find(([, packageDefaultName]) => packageDefaultName === ast.node.object.name) || []
+        // @ts-ignore
+        const packageName = packageDefaultNames.get(ast.node.object.name)
         if (!packageName) { return }
         const apis = packagesApis.get(packageName)
         if (!apis) { return }
@@ -115,6 +131,7 @@ const plugin = function (babel: {
           packageInvokedApis.clear()
           packageNeedDefault.clear()
           packageNames.clear()
+          packageDefaultNames.clear()
           packageIsApiImported.clear()
         },
         exit(ast, state: PluginPass) {
@@ -139,7 +156,7 @@ const plugin = function (babel: {
                   }
                   // @ts-ignore
                   const propertyName = node.imported.name
-                  // 如果未实现的 api，不去更改 Taro.api 这种引用
+                  // 如果是实现的 api，不去更改 Taro.api 这种引用
                   if (apis.has(propertyName)) {
                     return
                   }
@@ -166,15 +183,20 @@ const plugin = function (babel: {
 
               const invokedApis = packageInvokedApis.get(packageName) || new Map()
               const namedImports = Array.from(invokedApis.entries()).map(([imported, local]) => t.importSpecifier(t.identifier(local), t.identifier(imported)))
+              const defaultImportName = packageNames.get(packageName) || ''
+              
               if (packageNeedDefault.get(packageName)) {
-                const defaultImport = t.importDefaultSpecifier(t.identifier(packageNames.get(packageName) || ''))
+                const defaultImport = t.importDefaultSpecifier(t.identifier(defaultImportName))
                 ast.node.specifiers = [
                   defaultImport,
                   ...namedImports
                 ]
                 packageNeedDefault.set(packageName, false)
-              } else {
+              } else if (namedImports.length){
                 ast.node.specifiers = namedImports
+              } else {
+                // 没有引用则删除
+                ast.remove()
               }
             },
           })
