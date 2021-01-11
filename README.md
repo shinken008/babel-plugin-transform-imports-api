@@ -11,15 +11,15 @@ Convert import default package API to modular reference to reduce package size a
 import Taro from '@tarojs/taro-h5'
 Taro.request(...)
 ```
-this code will to become:
+This code will become:
 ```js
 import { request } from '@tarojs/taro-h5'
 request(...)
 ```
-when the configure is:
+and when the configure is:
 ```
+// .babelrc
 {
-  // .babelrc
   packagesApis: new Map([
     ['@tarojs/taro-h5', new Set(['request'])],
   ]),
@@ -32,7 +32,7 @@ when the configure is:
   }
 }
 ```
-the code will be become:
+this code will become:
 ```js
 import request from '@tarojs/taro-h5/lib/request';
 request(...)
@@ -48,8 +48,6 @@ or
 npm install --save-dev babel-plugin-transform-imports-api
 ```
 ### Step 1: Configure .babelrc
-
-
 ```js
 {
   plugins: [
