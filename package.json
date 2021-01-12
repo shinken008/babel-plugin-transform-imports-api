@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-transform-imports-api",
-  "version": "0.2.1",
+  "version": "1.0.0",
   "description": "Convert import default package API to modular reference to reduce package size and transforms member style imports.",
   "main": "dist/index.js",
   "scripts": {
