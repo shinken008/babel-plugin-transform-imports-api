@@ -89,7 +89,7 @@ jobs:
           draft: false
           prerelease: false
       - name: npm publish
-        if: startsWith( env.commitmsg , 'chore(release):' )
+        if: steps.tag_check.outputs.exists_tag == 'false' && startsWith( env.commitmsg , 'chore(release):' )
         run: npm publish
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
